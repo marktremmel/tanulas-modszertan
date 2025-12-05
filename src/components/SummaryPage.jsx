@@ -188,11 +188,25 @@ const getComparisonText = (value, average) => {
 
 const SummaryPage = () => {
     const [results, setResults] = useState({});
+    const [sharedData, setSharedData] = useState(null);
     const [shareUrl, setShareUrl] = useState('');
     const [showQr, setShowQr] = useState(false);
     const [animateStats, setAnimateStats] = useState(false);
 
     useEffect(() => {
+        // Check for shared data in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const shareParam = urlParams.get('share');
+
+        if (shareParam) {
+            try {
+                const decoded = JSON.parse(atob(shareParam));
+                setSharedData(decoded);
+            } catch (e) {
+                console.error('Failed to decode share data:', e);
+            }
+        }
+
         const data = getAllResults();
         setResults(data);
 
@@ -201,7 +215,8 @@ const SummaryPage = () => {
             p: data.personality?.dominantType,
             k: data.kolb?.quadrant,
             t: data.time?.level?.level,
-            s: data.study?.efficiency
+            s: data.study?.efficiency,
+            c: data.cameron?.scores ? Object.entries(data.cameron.scores).sort((a, b) => b[1] - a[1])[0]?.[0] : null
         };
         const encoded = btoa(JSON.stringify(shareData));
         // Use the full current URL (without query params) as the base
@@ -397,14 +412,83 @@ const SummaryPage = () => {
 
     if (!results) return <div>Loading...</div>;
 
+    // Helper function for shared data display
+    const getSharedPersonalityName = (key) => {
+        const names = {
+            szangvinikus: "Szangvinikus",
+            kolerikus: "Kolerikus",
+            melankolikus: "Melankolikus",
+            flegmatikus: "Flegmatikus"
+        };
+        return names[key] || key;
+    };
+
+    const getSharedCameronName = (key) => {
+        const names = {
+            aktivista: "🔥 Aktivista",
+            elemzo: "🔬 Elemző",
+            elmeleti: "📐 Elméleti",
+            pragmatikus: "🛠️ Pragmatikus"
+        };
+        return names[key] || key;
+    };
+
     return (
         <div className="summary-page fade-in">
             <h2>🏆 Összesített Eredmények</h2>
 
-            {!hasAnyResults ? (
+            {/* Shared Results Banner */}
+            {sharedData && (
+                <div className="shared-results-banner">
+                    <div className="shared-header">
+                        <span className="shared-icon">📨</span>
+                        <h3>Valaki megosztotta veled az eredményeit!</h3>
+                    </div>
+                    <div className="shared-grid">
+                        {sharedData.p && (
+                            <div className="shared-item">
+                                <span className="shared-label">🎭 Személyiség</span>
+                                <span className="shared-value">{getSharedPersonalityName(sharedData.p)}</span>
+                            </div>
+                        )}
+                        {sharedData.k && (
+                            <div className="shared-item">
+                                <span className="shared-label">🎯 Kolb Stílus</span>
+                                <span className="shared-value">{sharedData.k}</span>
+                            </div>
+                        )}
+                        {sharedData.t && (
+                            <div className="shared-item">
+                                <span className="shared-label">⏰ Időgazdálkodás</span>
+                                <span className="shared-value">{sharedData.t}. szint</span>
+                            </div>
+                        )}
+                        {sharedData.s && (
+                            <div className="shared-item">
+                                <span className="shared-label">📊 Tanulási Hatékonyság</span>
+                                <span className="shared-value">{Math.round(sharedData.s)}%</span>
+                            </div>
+                        )}
+                        {sharedData.c && (
+                            <div className="shared-item">
+                                <span className="shared-label">🎨 Cameron Stílus</span>
+                                <span className="shared-value">{getSharedCameronName(sharedData.c)}</span>
+                            </div>
+                        )}
+                    </div>
+                    <p className="shared-cta">Töltsd ki te is a teszteket és hasonlítsd össze az eredményeket! 👇</p>
+                </div>
+            )}
+
+            {!hasAnyResults && !sharedData ? (
                 <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
                     <h3>Még nincsenek eredmények</h3>
                     <p>Tölts ki legalább egy tesztet, hogy lásd az összesítést!</p>
+                </div>
+            ) : !hasAnyResults && sharedData ? (
+                <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
+                    <h3>🎮 Töltsd ki a teszteket!</h3>
+                    <p>Használd a navigációs menüt a tesztek eléréséhez, majd térj vissza ide az összehasonlításhoz!</p>
                 </div>
             ) : (
                 <>
