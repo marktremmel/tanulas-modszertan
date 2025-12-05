@@ -1,0 +1,63 @@
+.debug-fab-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.debug-fab {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #f59e0b;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.debug-fab:hover {
+    transform: scale(1.1);
+}
+
+.debug-menu {
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.debug-btn {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    font-size: 12px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.debug-btn:hover {
+    background: #f1f5f9;
+}
+
+.debug-btn.delete {
+    color: #ef4444;
+    border-color: #fee2e2;
+}
+
+.debug-btn.delete:hover {
+    background: #fef2f2;
+}

@@ -1,0 +1,156 @@
+.cameron-test {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.question-item {
+    background: var(--surface-color);
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.question-item:hover {
+    border-color: var(--primary-color);
+    background: #f8fafc;
+}
+
+.question-item.selected {
+    background: #eff6ff;
+    border-color: var(--primary-color);
+}
+
+.checkbox-wrapper {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.checkbox-wrapper input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 24px;
+    width: 24px;
+    background-color: #fff;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.question-item:hover .checkmark {
+    border-color: var(--primary-color);
+}
+
+.question-item.selected .checkmark {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.question-item.selected .checkmark:after {
+    display: block;
+}
+
+.question-item .checkmark:after {
+    left: 8px;
+    top: 4px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.question-text {
+    font-size: 1.1rem;
+    line-height: 1.5;
+}
+
+/* Results Styles */
+.preference-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.pref-very-low .preference-label {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.pref-low .preference-label {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.pref-moderate .preference-label {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.pref-strong .preference-label {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.pref-very-strong .preference-label {
+    background: #fef9c3;
+    color: #ca8a04;
+}
+
+.style-block {
+    margin-bottom: 2rem;
+}
+
+.style-block h3 {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.tips-section {
+    margin-top: 1.5rem;
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+}
+
+.tips-section h4 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.tips-section ul {
+    margin-left: 1.5rem;
+    color: var(--text-secondary);
+}
+
+.tips-section li {
+    margin-bottom: 0.5rem;
+}

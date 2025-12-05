@@ -1,0 +1,144 @@
+.personality-test {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.question-row-p {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.q-num {
+    font-weight: 700;
+    color: var(--text-secondary);
+    width: 30px;
+    flex-shrink: 0;
+}
+
+.options-grid-p {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.word-btn {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    background: white;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.word-btn:hover {
+    background: #f8fafc;
+    border-color: var(--primary-color);
+}
+
+.word-btn.selected {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Results */
+.dominant-card {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.dominant-card h3 {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.scores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.score-card {
+    background: white;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.score-card.dominant {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px var(--primary-color-light);
+}
+
+.score-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0.5rem 0;
+}
+
+.type-descriptions {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.type-block {
+    border-left: 4px solid transparent;
+}
+
+.type-block.highlight {
+    border-left-color: var(--primary-color);
+}
+
+.traits-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+.strengths h4 {
+    color: var(--success-color);
+    margin-bottom: 0.5rem;
+}
+
+.weaknesses h4 {
+    color: var(--error-color);
+    margin-bottom: 0.5rem;
+}
+
+.traits-grid ul {
+    list-style-type: disc;
+    margin-left: 1.5rem;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+    .options-grid-p {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .traits-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .options-grid-p {
+        grid-template-columns: 1fr;
+    }
+}
