@@ -204,7 +204,9 @@ const SummaryPage = () => {
             s: data.study?.efficiency
         };
         const encoded = btoa(JSON.stringify(shareData));
-        setShareUrl(`${window.location.origin}?share=${encoded}`);
+        // Use the full current URL (without query params) as the base
+        const baseUrl = window.location.href.split('?')[0];
+        setShareUrl(`${baseUrl}?share=${encoded}`);
 
         // Trigger stat bar animation
         setTimeout(() => setAnimateStats(true), 100);
