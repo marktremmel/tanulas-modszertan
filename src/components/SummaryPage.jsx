@@ -1,91 +1,173 @@
 import { useState, useEffect } from 'react';
 import QRCode from 'react-qr-code';
-import { getAllResults, exportResults } from '../utils/storage';
+import { getAllResults, exportResults, clearResults } from '../utils/storage';
 import { personalityTypes } from '../data/personalityQuestions';
 import { learningStyles } from '../data/kolbQuestions';
 import './SummaryPage.css';
 
-// Átlagos eredmények (becsült értékek kutatások alapján)
+// Átlagos eredmények - általános kutatási becslések alapján
+// Forrás: Oktatási kutatások átlagai diákok körében
 const AVERAGE_STATS = {
-    INT: 65,  // Tanulási hatékonyság átlag
-    DEX: 55,  // Időgazdálkodás átlag
-    WIS: 60,  // Kolb teszt alapján
-    CHA: 60,  // Cameron teszt alapján
-    studyEfficiency: 65,
-    timeLevel: 'III'
+    INT: 65,  // Tanulási hatékonyság: átlagos diák ~65%
+    DEX: 55,  // Időgazdálkodás: legtöbb ember a III. szinten (~55%)
+    WIS: 60,  // Tanulási stílus tudatosság
+    CHA: 60,  // Szociális készségek átlag
+    STR: 60   // Személyiség kiegyensúlyozottság
+};
+
+// Funky tippek kategóriánként
+const FUNKY_TIPS = {
+    aktivista: [
+        "🚀 Cselekvés közben tanulsz legjobban - próbálj ki mindent azonnal!",
+        "🎲 Unatkozni tilos! Keress új kihívásokat folyamatosan.",
+        "🏃 A halogatás a te ellenséged - ugorj fejest a dolgokba!",
+        "💡 Brainstorming sessionök = a te szuperképességed"
+    ],
+    elemzo: [
+        "🔍 Te vagy a megfigyelő mester - használd ki!",
+        "📊 Adatok és tények a barátaid, gyűjtsd őket szorgalmasan.",
+        "🧘 Ne rohanj - a gondolkodási idő számodra aranyat ér.",
+        "📝 Jegyzetelj sokat, később hálás leszel magadnak!"
+    ],
+    elmeleti: [
+        "🎓 Elméletek és modellek = a te játszótered!",
+        "🔗 Mindig keresd az összefüggéseket, a nagy képet.",
+        "📚 Olvasás, kutatás, mélyülés - ez a te utad.",
+        "🧩 Logikai rejtvények és rendszerezés a hobbidat kellene legyenek!"
+    ],
+    pragmatikus: [
+        "🛠️ 'Ez működik a gyakorlatban?' - ez legyen a mottód!",
+        "🎯 Konkrét célok és azonnali haszon motivál téged.",
+        "⚡ Gyors kipróbálás > hosszú tervezgetés neked.",
+        "💼 A 'hogyan alkalmazom ezt?' kérdés a kulcs számodra."
+    ]
 };
 
 // Személyre szabott tanácsok és következtetések
-const getPersonalizedInsights = (results, stats) => {
+const getPersonalizedInsights = (results, stats, cameronStyles) => {
     const insights = [];
 
     // Tanulási hatékonyság elemzés
     if (stats.INT > 80) {
         insights.push({
             icon: "🌟",
-            title: "Kiváló tanuló!",
-            text: "A tanulási szokásaid a legsikeresebb diákok módszereit követik. Tartsd meg ezeket!",
+            title: "Szupersztár tanuló!",
+            text: "A te tanulási technikáid a TOP 20%-ba tartoznak! Oszd meg másokkal a titkaidat!",
             type: "success"
+        });
+    } else if (stats.INT >= 60) {
+        insights.push({
+            icon: "📈",
+            title: "Jó úton jársz!",
+            text: "Szilárd tanulási alapjaid vannak. Egy-két apró változtatással még jobb lehetsz!",
+            type: "info"
         });
     } else if (stats.INT < 50) {
         insights.push({
-            icon: "📚",
-            title: "Fejleszd a tanulási technikáidat!",
-            text: "Érdemes lehet új tanulási módszereket kipróbálnod - próbáld meg a Pomodoro technikát!",
+            icon: "🎮",
+            title: "Level Up szükséges!",
+            text: "Próbáld ki a Pomodoro technikát (25 perc tanulás, 5 perc szünet) - game changer!",
             type: "warning"
         });
     }
 
-    // Időgazdálkodás elemzés
+    // Időgazdálkodás - funky
     if (results.time?.level?.level === "V") {
         insights.push({
-            icon: "⏰",
-            title: "Időgazdálkodási mester!",
-            text: "A legmagasabb szinten állsz az időgazdálkodásban. Gratulálunk!",
+            icon: "⚡",
+            title: "Time Lord státusz elérve!",
+            text: "Az időgazdálkodásod legendás szinten van. Taníthatnád másoknak!",
             type: "success"
+        });
+    } else if (results.time?.level?.level === "IV") {
+        insights.push({
+            icon: "🏆",
+            title: "Majdnem tökéletes!",
+            text: "Nagyon közel vagy a csúcshoz! Még egy kis fókusz és ott vagy.",
+            type: "info"
         });
     } else if (results.time?.level?.level === "I" || results.time?.level?.level === "II") {
         insights.push({
-            icon: "⏳",
-            title: "Az idő a barátod lehet!",
-            text: "Próbálj meg prioritásokat felállítani és kerüld a halogatást.",
+            icon: "⏰",
+            title: "Procrastination Boss Fight!",
+            text: "A halogatás a főellenséged. Tipp: Kezdd a nap legnehezebb feladatával!",
             type: "warning"
         });
     }
 
-    // Személyiség alapú tanács
+    // Cameron stílusok - részletes elemzés
+    if (cameronStyles) {
+        const dominant = Object.entries(cameronStyles).sort((a, b) => b[1] - a[1])[0];
+        if (dominant) {
+            const [style, score] = dominant;
+            const tips = FUNKY_TIPS[style] || [];
+            const randomTip = tips[Math.floor(Math.random() * tips.length)];
+
+            const styleNames = {
+                aktivista: "🔥 Aktivista",
+                elemzo: "🔬 Elemző",
+                elmeleti: "📐 Elméleti",
+                pragmatikus: "🛠️ Pragmatikus"
+            };
+
+            insights.push({
+                icon: styleNames[style]?.split(' ')[0] || "🎯",
+                title: `Domináns stílusod: ${styleNames[style]?.split(' ')[1] || style}`,
+                text: randomTip || "Használd ki az erősségeidet a tanulásban!",
+                type: "info"
+            });
+        }
+    }
+
+    // Személyiség alapú tanács - funkybb
     if (results.personality?.dominantType) {
         const type = results.personality.dominantType;
         const typeInsights = {
-            szangvinikus: { icon: "🎉", text: "Társas tanulás és csoportmunka lehet a kulcs számodra!" },
-            kolerikus: { icon: "🎯", text: "Célkitűzések és kihívások motiválnak leginkább." },
-            melankolikus: { icon: "📝", text: "Részletes jegyzetek és struktúrált tanulás illik hozzád." },
-            flegmatikus: { icon: "🧘", text: "Saját tempódban, nyugodt környezetben tanulsz legjobban." }
+            szangvinikus: {
+                icon: "🎉",
+                title: "Party Animal Learner!",
+                text: "Csapatmunka, beszélgetés, vita - így szívod magadba a tudást! Keress tanulótársakat!"
+            },
+            kolerikus: {
+                icon: "⚔️",
+                title: "Born Leader!",
+                text: "Kihívásokra van szükséged. Állíts fel nehéz célokat és hódítsd meg őket!"
+            },
+            melankolikus: {
+                icon: "📖",
+                title: "Deep Thinker!",
+                text: "Részletes jegyzetek, csendes hely, mély koncentráció - ez a te zónád!"
+            },
+            flegmatikus: {
+                icon: "🌿",
+                title: "Zen Master!",
+                text: "Saját tempó, nulla stressz. Ne hagyd, hogy mások siettessenek!"
+            }
         };
         if (typeInsights[type]) {
             insights.push({
                 icon: typeInsights[type].icon,
-                title: `${personalityTypes[type]?.name} személyiség`,
+                title: typeInsights[type].title,
                 text: typeInsights[type].text,
                 type: "info"
             });
         }
     }
 
-    // Kolb stílus alapú tanács
+    // Kolb stílus alapú tanács - kreatívabb
     if (results.kolb?.quadrant) {
         const kolbTips = {
-            "Alkalmazkodó": "Gyakori tapasztalatszerzés és kísérletezés segít neked.",
-            "Divergáló": "Brainstorming és kreatív megközelítések az erősségeid.",
-            "Asszimiláló": "Elméletek és modellek segítségével tanulsz legjobban.",
-            "Konvergáló": "Gyakorlati alkalmazások és problémamegoldás a te utad."
+            "Alkalmazkodó": { icon: "🦎", text: "Próbálj ki új dolgokat bátran! A hibákból tanulsz a legtöbbet." },
+            "Divergáló": { icon: "🎨", text: "Kreatív projektek és brainstorming = a te szuperképességed!" },
+            "Asszimiláló": { icon: "🔮", text: "Elméletek, modellek, nagy kép - te látod át az egészet!" },
+            "Konvergáló": { icon: "🎯", text: "Gyakorlati megoldások mestere vagy - alkalmazd a tudást azonnal!" }
         };
         const quadrant = results.kolb.quadrant;
         if (kolbTips[quadrant]) {
             insights.push({
-                icon: "🧠",
-                title: `${quadrant} tanulási típus`,
-                text: kolbTips[quadrant],
+                icon: kolbTips[quadrant].icon,
+                title: `${quadrant} Tanulási Ninja`,
+                text: kolbTips[quadrant].text,
                 type: "info"
             });
         }
@@ -98,7 +180,7 @@ const getPersonalizedInsights = (results, stats) => {
 const getComparisonText = (value, average) => {
     const diff = value - average;
     if (diff > 15) return { text: "Top 20%! 🔥", class: "excellent" };
-    if (diff > 5) return { text: "Átlag felett! ⬆️", class: "good" };
+    if (diff > 5) return { text: "Átlag felett ⬆️", class: "good" };
     if (diff > -5) return { text: "Átlagos", class: "average" };
     if (diff > -15) return { text: "Átlag alatt ⬇️", class: "below" };
     return { text: "Fejleszthető 💪", class: "needs-work" };
@@ -128,14 +210,80 @@ const SummaryPage = () => {
         setTimeout(() => setAnimateStats(true), 100);
     }, []);
 
+    // Kreatív RPG kaszt generátor a tesztek kombinációja alapján
     const getRPGClass = () => {
         try {
-            if (!results.personality?.dominantType) return "Novice Adventurer";
-            const type = personalityTypes[results.personality.dominantType]?.name || results.personality.dominantType;
-            const kolb = results.kolb?.quadrant ? results.kolb.quadrant.split(' ')[0] : "";
-            return `${kolb} ${type}`.trim();
+            const personality = results.personality?.dominantType;
+            const kolb = results.kolb?.quadrant;
+            const cameron = cameronStyles ? Object.entries(cameronStyles).sort((a, b) => b[1] - a[1])[0]?.[0] : null;
+            const timeLevel = results.time?.level?.level;
+
+            // Ha nincs elég adat
+            if (!personality && !kolb) return "🌱 Novice Adventurer";
+
+            // Fantasy class kombinációk
+            const classMatrix = {
+                // Személyiség + Kolb kombinációk
+                'szangvinikus': {
+                    'Alkalmazkodó': '🎭 Chaos Bard',
+                    'Divergáló': '✨ Dream Weaver',
+                    'Asszimiláló': '📜 Storyteller Sage',
+                    'Konvergáló': '🎪 Performance Artist',
+                    'default': '🌟 Social Butterfly'
+                },
+                'kolerikus': {
+                    'Alkalmazkodó': '⚔️ Battle Commander',
+                    'Divergáló': '🔥 Visionary Warlord',
+                    'Asszimiláló': '👑 Strategic Emperor',
+                    'Konvergáló': '🛡️ Tactical Crusader',
+                    'default': '⚡ Ambitious Leader'
+                },
+                'melankolikus': {
+                    'Alkalmazkodó': '🔮 Mystic Scholar',
+                    'Divergáló': '📖 Creative Philosopher',
+                    'Asszimiláló': '🧙 Arcane Archivist',
+                    'Konvergáló': '⚗️ Precision Alchemist',
+                    'default': '🌙 Deep Thinker'
+                },
+                'flegmatikus': {
+                    'Alkalmazkodó': '🌿 Zen Wanderer',
+                    'Divergáló': '🎨 Peaceful Artist',
+                    'Asszimiláló': '📚 Tranquil Sage',
+                    'Konvergáló': '🏔️ Steady Guardian',
+                    'default': '☯️ Calm Observer'
+                }
+            };
+
+            // Fő kaszt meghatározása
+            let baseClass = '🎮 Adventurer';
+            if (personality && classMatrix[personality]) {
+                baseClass = classMatrix[personality][kolb] || classMatrix[personality]['default'];
+            }
+
+            // Cameron alapú módosító
+            const cameronModifiers = {
+                'aktivista': ' of Action',
+                'elemzo': ' of Wisdom',
+                'elmeleti': ' of Knowledge',
+                'pragmatikus': ' of Practice'
+            };
+
+            // Időgazdálkodás alapú rang
+            const timeRanks = {
+                'V': 'Legendary ',
+                'IV': 'Master ',
+                'III': '',
+                'II': 'Apprentice ',
+                'I': 'Novice '
+            };
+
+            const rank = timeRanks[timeLevel] || '';
+            const modifier = cameron ? (cameronModifiers[cameron] || '') : '';
+
+            return `${rank}${baseClass}${modifier}`.trim();
         } catch (e) {
-            return "Adventurer";
+            console.error('Error generating class:', e);
+            return '🎮 Adventurer';
         }
     };
 
@@ -150,7 +298,6 @@ const SummaryPage = () => {
     };
 
     const getXP = () => {
-        // Calculate XP based on completed tests and scores
         let xp = 0;
         if (results.kolb) xp += 150;
         if (results.cameron) xp += 150;
@@ -160,17 +307,55 @@ const SummaryPage = () => {
         return xp;
     };
 
+    // Cameron stílusok kinyerése - tényleges adatok alapján
+    const getCameronStyles = () => {
+        if (!results.cameron?.scores) return null;
+        const scores = results.cameron.scores;
+        // Normalizálás 0-100 skálára (max 20 pont kategóriánként)
+        return {
+            aktivista: Math.round((scores.aktivista / 20) * 100),
+            elemzo: Math.round((scores.elemzo / 20) * 100),
+            elmeleti: Math.round((scores.elmeleti / 20) * 100),
+            pragmatikus: Math.round((scores.pragmatikus / 20) * 100)
+        };
+    };
+
+    const cameronStyles = getCameronStyles();
+
+    // Stats - tényleges adatokból számolva (nem random!)
     const getStats = () => {
         try {
-            return {
-                INT: results.study ? Math.round(results.study.efficiency) : 0,
-                WIS: results.kolb ? 75 + Math.floor(Math.random() * 20) : 0,
-                CHA: results.cameron ? 70 + Math.floor(Math.random() * 25) : 0,
-                DEX: results.time ? Math.round((results.time.totalScore / 240) * 100) : 0,
-                STR: results.personality ? 65 + Math.floor(Math.random() * 25) : 0
-            };
+            // INT: Tanulási hatékonyság tesztből
+            const INT = results.study ? Math.round(results.study.efficiency) : 0;
+
+            // DEX: Időgazdálkodás tesztből (pontszám/max * 100)
+            const DEX = results.time ? Math.round((results.time.totalScore / 240) * 100) : 0;
+
+            // WIS: Kolb teszt kitöltöttség + elméleti/reflektív irányultság
+            let WIS = 0;
+            if (results.kolb) {
+                // Magasabb bölcsesség, ha reflektív (B) és absztrakt (C) irányban erős
+                const b = results.kolb.sums?.B || 0;
+                const c = results.kolb.sums?.C || 0;
+                WIS = Math.min(100, Math.round(((b + c) / 96) * 100 + 20));
+            }
+
+            // CHA: Cameron teszt - aktivista + pragmatikus kombináció
+            let CHA = 0;
+            if (cameronStyles) {
+                CHA = Math.round((cameronStyles.aktivista + cameronStyles.pragmatikus) / 2);
+            }
+
+            // STR: Személyiség teszt - domináns típus erőssége
+            let STR = 0;
+            if (results.personality?.scores) {
+                const maxScore = Math.max(...Object.values(results.personality.scores));
+                STR = Math.round((maxScore / 40) * 100);
+            }
+
+            return { INT, DEX, WIS, CHA, STR };
         } catch (e) {
-            return { INT: 0, WIS: 0, CHA: 0, DEX: 0, STR: 0 };
+            return { INT: 0, DEX: 0, WIS: 0, CHA: 0, STR: 0 };
         }
     };
 
@@ -196,8 +381,17 @@ const SummaryPage = () => {
 
     const stats = getStats();
     const hasAnyResults = results && Object.keys(results).length > 0;
-    const insights = hasAnyResults ? getPersonalizedInsights(results, stats) : [];
+    const insights = hasAnyResults ? getPersonalizedInsights(results, stats, cameronStyles) : [];
     const completedTests = Object.keys(results).length;
+
+    // Stat leírások (mi alapján számoljuk)
+    const statDescriptions = {
+        INT: "Tanulási Technikák teszt eredménye",
+        DEX: "Időgazdálkodás teszt eredménye",
+        WIS: "Kolb teszt reflektív/absztrakt irányultsága",
+        CHA: "Cameron teszt aktivista/pragmatikus átlaga",
+        STR: "Személyiségteszt domináns típus erőssége"
+    };
 
     if (!results) return <div>Loading...</div>;
 
@@ -238,13 +432,13 @@ const SummaryPage = () => {
 
                             <div className="rpg-stats">
                                 {[
-                                    { key: 'INT', label: '🧠 Intelligencia', color: '#667eea' },
-                                    { key: 'DEX', label: '⚡ Gyorsaság', color: '#f093fb' },
-                                    { key: 'WIS', label: '📚 Bölcsesség', color: '#4facfe' },
-                                    { key: 'CHA', label: '💫 Karizma', color: '#43e97b' },
-                                    { key: 'STR', label: '💪 Erő', color: '#fa709a' }
+                                    { key: 'INT', label: '🧠 Intelligencia', color: '#667eea', desc: statDescriptions.INT },
+                                    { key: 'DEX', label: '⚡ Gyorsaság', color: '#f093fb', desc: statDescriptions.DEX },
+                                    { key: 'WIS', label: '📚 Bölcsesség', color: '#4facfe', desc: statDescriptions.WIS },
+                                    { key: 'CHA', label: '💫 Karizma', color: '#43e97b', desc: statDescriptions.CHA },
+                                    { key: 'STR', label: '💪 Erő', color: '#fa709a', desc: statDescriptions.STR }
                                 ].map(stat => (
-                                    <div className="stat-row" key={stat.key}>
+                                    <div className="stat-row" key={stat.key} title={stat.desc}>
                                         <span className="stat-label">{stat.label}</span>
                                         <div className="stat-bar">
                                             <div
@@ -267,12 +461,59 @@ const SummaryPage = () => {
                                 <span>✅ {completedTests}/5 Teszt Kitöltve</span>
                             </div>
                         </div>
+
+                        {/* Disclaimer */}
+                        <div className="rpg-disclaimer">
+                            ⚠️ <strong>Fun mód:</strong> Az RPG statisztikák szórakoztató célú becslések a teszt eredményeid alapján.
+                            Az "átlag" értékek általános oktatási kutatások becsült átlagai (nem egyéni mérés).
+                        </div>
                     </div>
+
+                    {/* Cameron Stílusok - ha van */}
+                    {cameronStyles && (
+                        <div className="cameron-section">
+                            <h3>🎨 Tanulási Stílusok (Cameron)</h3>
+                            <div className="cameron-grid">
+                                <div className="cameron-card aktivista">
+                                    <div className="cameron-icon">🔥</div>
+                                    <div className="cameron-name">Aktivista</div>
+                                    <div className="cameron-score">{cameronStyles.aktivista}%</div>
+                                    <div className="cameron-bar">
+                                        <div style={{ width: `${cameronStyles.aktivista}%` }}></div>
+                                    </div>
+                                </div>
+                                <div className="cameron-card elemzo">
+                                    <div className="cameron-icon">🔬</div>
+                                    <div className="cameron-name">Elemző</div>
+                                    <div className="cameron-score">{cameronStyles.elemzo}%</div>
+                                    <div className="cameron-bar">
+                                        <div style={{ width: `${cameronStyles.elemzo}%` }}></div>
+                                    </div>
+                                </div>
+                                <div className="cameron-card elmeleti">
+                                    <div className="cameron-icon">📐</div>
+                                    <div className="cameron-name">Elméleti</div>
+                                    <div className="cameron-score">{cameronStyles.elmeleti}%</div>
+                                    <div className="cameron-bar">
+                                        <div style={{ width: `${cameronStyles.elmeleti}%` }}></div>
+                                    </div>
+                                </div>
+                                <div className="cameron-card pragmatikus">
+                                    <div className="cameron-icon">🛠️</div>
+                                    <div className="cameron-name">Pragmatikus</div>
+                                    <div className="cameron-score">{cameronStyles.pragmatikus}%</div>
+                                    <div className="cameron-bar">
+                                        <div style={{ width: `${cameronStyles.pragmatikus}%` }}></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Personalized Insights */}
                     {insights.length > 0 && (
                         <div className="insights-section">
-                            <h3>🔮 Személyre Szabott Elemzés</h3>
+                            <h3>🔮 Személyre Szabott Tippek</h3>
                             <div className="insights-grid">
                                 {insights.map((insight, idx) => (
                                     <div className={`insight-card ${insight.type}`} key={idx}>
@@ -323,6 +564,17 @@ const SummaryPage = () => {
                         </button>
                         <button className="btn btn-primary" onClick={() => setShowQr(!showQr)}>
                             📱 QR Kód Megosztás
+                        </button>
+                        <button
+                            className="btn btn-danger"
+                            onClick={() => {
+                                if (window.confirm('⚠️ Biztosan törölni akarod az összes eredményt?\n\nEz a művelet nem visszavonható!')) {
+                                    clearResults();
+                                    window.location.reload();
+                                }
+                            }}
+                        >
+                            🗑️ Adatok Törlése
                         </button>
                     </div>
 

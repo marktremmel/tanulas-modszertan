@@ -500,3 +500,143 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* RPG Disclaimer */
+.rpg-disclaimer {
+    background: rgba(251, 191, 36, 0.1);
+    border-top: 1px solid rgba(251, 191, 36, 0.3);
+    padding: 0.8rem 1.5rem;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+}
+
+.rpg-disclaimer strong {
+    color: #fbbf24;
+}
+
+/* Cameron Section */
+.cameron-section {
+    margin-bottom: 2rem;
+}
+
+.cameron-section h3 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+}
+
+.cameron-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.cameron-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border: 2px solid transparent;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cameron-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.cameron-card.aktivista {
+    border-color: #ef4444;
+    background: linear-gradient(135deg, #fef2f2, white);
+}
+
+.cameron-card.elemzo {
+    border-color: #3b82f6;
+    background: linear-gradient(135deg, #eff6ff, white);
+}
+
+.cameron-card.elmeleti {
+    border-color: #8b5cf6;
+    background: linear-gradient(135deg, #f5f3ff, white);
+}
+
+.cameron-card.pragmatikus {
+    border-color: #22c55e;
+    background: linear-gradient(135deg, #f0fdf4, white);
+}
+
+.cameron-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.cameron-name {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+    color: var(--text-primary);
+}
+
+.cameron-score {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.cameron-card.aktivista .cameron-score {
+    color: #ef4444;
+}
+
+.cameron-card.elemzo .cameron-score {
+    color: #3b82f6;
+}
+
+.cameron-card.elmeleti .cameron-score {
+    color: #8b5cf6;
+}
+
+.cameron-card.pragmatikus .cameron-score {
+    color: #22c55e;
+}
+
+.cameron-bar {
+    height: 8px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.cameron-bar div {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s ease-out;
+}
+
+.cameron-card.aktivista .cameron-bar div {
+    background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+.cameron-card.elemzo .cameron-bar div {
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+
+.cameron-card.elmeleti .cameron-bar div {
+    background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+}
+
+.cameron-card.pragmatikus .cameron-bar div {
+    background: linear-gradient(90deg, #22c55e, #4ade80);
+}
+
+/* Stat tooltip on hover */
+.stat-row[title] {
+    cursor: help;
+}
+
+@media (max-width: 600px) {
+    .cameron-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

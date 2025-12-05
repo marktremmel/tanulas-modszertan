@@ -33,7 +33,7 @@ export const getAllResults = () => {
     }
 };
 
-export const clearAllResults = () => {
+export const clearResults = () => {
     localStorage.removeItem(STORAGE_KEY);
 };
 
