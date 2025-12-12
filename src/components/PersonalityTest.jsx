@@ -135,7 +135,7 @@ const PersonalityTest = () => {
                                 <button
                                     key={idx}
                                     className={`word-btn ${answers[q.id] === opt.type ? 'selected' : ''}`}
-                                    onClick={() => handleAnswer(q.id, opt.type)}
+                                    onClick={() => handleSelect(q.id, opt.type)}
                                 >
                                     {opt.text}
                                 </button>

@@ -37,8 +37,7 @@ A legegyszerűbb módszer a `gh-pages` csomag használata.
     ```json
     "scripts": {
       // ... egyéb scriptek ...
-      "predeploy": "npm run build",
-      "deploy": "gh-pages -d dist"
+ ru
     }
     ```
 
